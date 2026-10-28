@@ -389,11 +389,19 @@ def patch_cargo():
     # dev profile strip
     if 'strip = "symbols"' not in s:
         s = s.replace('[profile.dev]', '[profile.dev]\nstrip = "symbols"', 1)
-    # 依赖 opt-level（dev-dependencies 或 [profile.dev.package."*"] 之类不强制）
     if s != orig:
         write(p, s)
+    # Cargo.lock 同步替换 git 源（--locked 构建时 lock 必须匹配）
+    lock = P("plain-rs/Cargo.lock")
+    if os.path.exists(lock):
+        lk = read(lock)
+        lk2 = lk.replace("https://github.com/plainhub/plain-core.git",
+                         "https://github.com/717998477/plain-core-private.git")
+        if lk2 != lk:
+            write(lock, lk2)
+            print("   Cargo.lock git 源已同步")
     if "plain-core-private.git" in s and 'strip = "symbols"' in s:
-        record("cargo", True, "core 指向 private + dev strip")
+        record("cargo", True, "core 指向 private + dev strip + lock 同步")
         return True
     record("cargo", False, "Cargo 补丁不完整")
     return False
