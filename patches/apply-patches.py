@@ -391,12 +391,24 @@ def patch_cargo():
         s = s.replace('[profile.dev]', '[profile.dev]\nstrip = "symbols"', 1)
     if s != orig:
         write(p, s)
-    # Cargo.lock 同步替换 git 源（--locked 构建时 lock 必须匹配）
+    # Cargo.lock 同步替换 git 源，并把锁定的 commit 更新为 plain-core-private 的 main HEAD
+    # （plain-core-private 是我们的定制 core，与上游 core 已分叉，必须锁定到我们的 HEAD）
     lock = P("plain-rs/Cargo.lock")
     if os.path.exists(lock):
         lk = read(lock)
         lk2 = lk.replace("https://github.com/plainhub/plain-core.git",
                          "https://github.com/717998477/plain-core-private.git")
+        try:
+            import subprocess
+            head = subprocess.check_output(
+                ["git", "ls-remote", "https://github.com/717998477/plain-core-private.git", "main"],
+                stderr=subprocess.DEVNULL, timeout=60,
+            ).decode().split()[0]
+            lk2 = re.sub(r'(plain-core-private\.git\?branch=main#)[0-9a-f]{40}',
+                         lambda m: m.group(1) + head, lk2)
+            print(f"   Cargo.lock 锁定 plain-core-private@{head[:12]}")
+        except Exception as e:  # noqa
+            print(f"   ⚠️ 获取 plain-core-private HEAD 失败: {e}")
         if lk2 != lk:
             write(lock, lk2)
             print("   Cargo.lock git 源已同步")

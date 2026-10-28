@@ -89,10 +89,9 @@ jobs:
               git clean -fdq
               continue
             fi
-            # 2) 快速预检：Cargo.lock 锁定的 plain-core commit 必须在 plain-core-private 存在
-            CORE_SHA=$(grep -oP 'plain-core-private\.git\?branch=main#\K[0-9a-f]{40}' plain-rs/Cargo.lock | head -1)
-            if [ -n "$CORE_SHA" ] && ! git ls-remote https://github.com/717998477/plain-core-private.git "$CORE_SHA" 2>/dev/null | grep -q .; then
-              echo "❌ plain-core commit $CORE_SHA 不在 private 仓库（版本不兼容），回退下一版本..."
+            # 2) 快速预检：Cargo.lock 必须已指向 plain-core-private（脚本锁定到其 main HEAD）
+            if ! grep -q "plain-core-private.git" plain-rs/Cargo.lock; then
+              echo "❌ Cargo.lock 未指向 plain-core-private，回退下一版本..."
               git checkout -q .
               git clean -fdq
               continue
