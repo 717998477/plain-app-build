@@ -90,10 +90,9 @@ jobs:
           targets: aarch64-linux-android
 
       - name: Cache Rust build
-        working-directory: src
         uses: Swatinem/rust-cache@v2.9.3
         with:
-          workspaces: plain-rs -> target
+          workspaces: src/plain-rs -> src/target
 
       - name: Grant execute permission for gradlew
         working-directory: src
