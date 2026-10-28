@@ -1,0 +1,17 @@
+name: Probe
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout patch repo
+        uses: actions/checkout@v7
+        with:
+          path: patch-repo
+      - name: List files
+        run: ls -la patch-repo | head -20
+      - name: Show patches
+        run: ls patch-repo/patches
