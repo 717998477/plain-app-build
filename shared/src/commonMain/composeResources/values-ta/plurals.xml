@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="posts">
+        <item quantity="one">%1$d பதிவு</item>
+        <item quantity="other">%1$d பதிவுகள்</item>
+    </plurals>
+    <plurals name="items">
+        <item quantity="one">%1$d பொருள்</item>
+        <item quantity="other">%1$d பொருட்கள்</item>
+    </plurals>
+    <plurals name="x_folders">
+        <item quantity="one">%1$d கோப்புறை</item>
+        <item quantity="other">%1$d கோப்புறைகள்</item>
+    </plurals>
+    <plurals name="x_files">
+        <item quantity="one">%1$d கோப்பு</item>
+        <item quantity="other">%1$d கோப்புகள்</item>
+    </plurals>
+    <plurals name="copying_items">
+        <item quantity="one">%1$d பொருள் நகலை நகலெடுக்கின்றன</item>
+        <item quantity="other">%1$d பொருள்கள் நகலை நகலெடுக்கின்றன</item>
+    </plurals>
+    <plurals name="moving_items">
+        <item quantity="one">%1$d பொருள் நகலை நகலெடுக்கின்றன</item>
+        <item quantity="other">%1$d பொருள்கள் நகலை நகலெடுக்கின்றன</item>
+    </plurals>
+    <plurals name="n_hours">
+        <item quantity="one">%1$d மணிநேரம்</item>
+        <item quantity="other">%1$d மணிநேரம்</item>
+    </plurals>
+    <plurals name="n_minutes">
+        <item quantity="one">%1$d நிமிடம்</item>
+        <item quantity="other">%1$d நிமிடங்கள்</item>
+    </plurals>
+    <plurals name="n_seconds">
+        <item quantity="one">%1$d விநாடி</item>
+        <item quantity="other">%1$d விநாடிகள்</item>
+    </plurals>
+    <plurals name="n_pomodoros">
+        <item quantity="one">%1$d போமோடோரோ</item>
+        <item quantity="other">%1$d போமோடோரோ</item>
+    </plurals>
+    <plurals name="today_stats_pomodoros">
+        <item quantity="one">இன்று: %1$d போமோடோரோ</item>
+        <item quantity="other">இன்று: %1$d போமோடோரோ</item>
+    </plurals>
+    <plurals name="total_stats_pomodoros">
+        <item quantity="one">மொத்தம்: %1$d போமோடோரோ</item>
+        <item quantity="other">மொத்தம்: %1$d போமோடோரோ</item>
+    </plurals>
+    <plurals name="added_n_items">
+        <item quantity="one">%1$d உருப்படிகள் சேர்க்கப்பட்டன</item>
+        <item quantity="other">%1$d உருப்படிகள் சேர்க்கப்பட்டன</item>
+    </plurals>
+    <plurals name="sent_to_n_targets">
+        <item quantity="one">%1$d அரட்டைக்கு அனுப்பப்பட்டது</item>
+        <item quantity="other">%1$d அரட்டைகளுக்கு அனுப்பப்பட்டது</item>
+    </plurals>
+    <plurals name="saved_n_items">
+        <item quantity="one">%1$d சேமிக்கப்பட்டது</item>
+        <item quantity="other">%1$d சேமிக்கப்பட்டன</item>
+    </plurals>
+    <plurals name="kept_n_files">
+        <item quantity="one">%1$d கோப்பு வைக்கப்பட்டது</item>
+        <item quantity="other">%1$d கோப்புகள் வைக்கப்பட்டன</item>
+    </plurals>
+</resources>

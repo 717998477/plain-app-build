@@ -1,0 +1,115 @@
+package com.ismartcoding.plain.ui.base
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import com.ismartcoding.plain.ui.resources.Res as UiRes
+import com.ismartcoding.plain.ui.resources.arrow_left as ui_drawable_arrow_left
+import com.ismartcoding.plain.ui.resources.back as ui_string_back
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.ismartcoding.plain.ui.base.HorizontalSpace
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PTopAppBar(
+    onNavigateBack: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    navigationIcon: (@Composable () -> Unit)? = null,
+    title: String,
+    subtitle: String = "",
+    titleTrailing: (@Composable () -> Unit)? = null,
+    containerColor: Color? = null,
+    subtitleColor: Color? = null,
+    actions: (@Composable RowScope.() -> Unit)? = null,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
+) {
+    val topBarColor = containerColor ?: MaterialTheme.colorScheme.background
+    val topBarSubtitleColor = subtitleColor ?: MaterialTheme.colorScheme.onSurfaceVariant
+    // Material3 TopAppBar animates its container color internally, which lags behind the
+    // instantly-changing page background during theme switches. Draw the color on an instant
+    // Surface here and keep the inner bar transparent so both change together.
+    Surface(
+        color = topBarColor,
+        modifier = modifier,
+    ) {
+        TopAppBar(
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (subtitle.isEmpty()) {
+                        Text(
+                            title,
+                            style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.SemiBold),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                    } else {
+                        Column(modifier = Modifier.weight(1f, fill = false)) {
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.SemiBold),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text(
+                                text = subtitle,
+                                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
+                                color = topBarSubtitleColor,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
+                    }
+                    titleTrailing?.invoke()
+                }
+            },
+            navigationIcon = {
+                when {
+                    navigationIcon != null -> navigationIcon()
+                    onNavigateBack != null -> BackIcon(onClick = onNavigateBack)
+                }
+            },
+            actions = {
+                actions?.invoke(this)
+                HorizontalSpace(8.dp)
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent,
+                scrolledContainerColor = Color.Transparent,
+            ),
+            scrollBehavior = scrollBehavior,
+        )
+    }
+}
+
+@Composable
+private fun BackIcon(onClick: () -> Unit) {
+    IconButton(onClick = onClick) {
+        Icon(
+            painter = painterResource(UiRes.drawable.ui_drawable_arrow_left),
+            contentDescription = stringResource(UiRes.string.ui_string_back),
+            tint = MaterialTheme.colorScheme.onSurface,
+        )
+    }
+}

@@ -1,0 +1,119 @@
+package com.ismartcoding.plain.ui.audio.components
+
+import com.ismartcoding.plain.features.files.FilesClient
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.ismartcoding.plain.models.Tag
+import com.ismartcoding.plain.models.TagRelation
+import com.ismartcoding.plain.i18n.*
+import com.ismartcoding.plain.lib.extensions.formatBytes
+import com.ismartcoding.plain.lib.extensions.formatDurationMs
+import com.ismartcoding.plain.lib.extensions.getMimeType
+import com.ismartcoding.plain.platform.system.formatDateTime
+import com.ismartcoding.plain.ui.base.BottomSpace
+import com.ismartcoding.plain.ui.base.CopyIconButton
+import com.ismartcoding.plain.ui.base.PCard
+import com.ismartcoding.plain.ui.base.PListItem
+import com.ismartcoding.plain.ui.base.PModalBottomSheet
+import com.ismartcoding.plain.ui.base.PSectionTitle
+import com.ismartcoding.plain.ui.base.VerticalSpace
+import com.ismartcoding.plain.ui.base.dragselect.DragSelectState
+import com.ismartcoding.plain.ui.components.FileRenameDialog
+import com.ismartcoding.plain.ui.components.TagSelector
+import com.ismartcoding.plain.ui.audio.AudioViewModel
+import com.ismartcoding.plain.ui.casting.CastViewModel
+import com.ismartcoding.plain.ui.tags.TagsViewModel
+import com.ismartcoding.plain.ui.theme.PlainTheme
+import org.jetbrains.compose.resources.stringResource
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ViewAudioBottomSheet(
+    audioVM: AudioViewModel,
+    tagsVM: TagsViewModel,
+    tagsMapState: Map<String, List<TagRelation>>,
+    tagsState: List<Tag>,
+    dragSelectState: DragSelectState,
+    castVM: CastViewModel? = null,
+    // Set when opened from a playlist detail page; enables remove-from-playlist.
+    playlistId: String? = null,
+    onPlaylistChanged: () -> Unit = {},
+) {
+    val m = audioVM.selectedItem.value ?: return
+    val onDismiss = {
+        audioVM.selectedItem.value = null
+    }
+
+    if (audioVM.showRenameDialog.value) {
+        FileRenameDialog(path = m.path, onDismiss = {
+            audioVM.showRenameDialog.value = false
+        }, onRename = { p, name -> FilesClient.rename(p, name) }, onRenamed = {
+            audioVM.loadAsync(tagsVM)
+            onDismiss()
+        })
+    }
+
+    PModalBottomSheet(
+        onDismissRequest = {
+            onDismiss()
+        },
+    ) {
+        LazyColumn {
+            item {
+                VerticalSpace(16.dp)
+            }
+            item {
+                AudioActionButtons(
+                    m = m,
+                    audioVM = audioVM,
+                    tagsVM = tagsVM,
+                    dragSelectState = dragSelectState,
+                    onDismiss = onDismiss,
+                    playlistId = playlistId,
+                    onPlaylistChanged = onPlaylistChanged,
+                )
+            }
+            if (!audioVM.trash.value) {
+                item {
+                    VerticalSpace(dp = 16.dp)
+                    PSectionTitle(title = stringResource(Res.string.tags))
+                    TagSelector(
+                        data = m,
+                        tagsVM = tagsVM,
+                        tagsMap = tagsMapState,
+                        tagsState = tagsState,
+                        onChangedAsync = {
+                            audioVM.loadAsync(tagsVM)
+                        }
+                    )
+                }
+            }
+            item {
+                VerticalSpace(dp = 16.dp)
+                PCard(modifier = Modifier.padding(horizontal = PlainTheme.PAGE_HORIZONTAL_MARGIN)) {
+                    PListItem(title = m.path, action = {
+                        CopyIconButton(text = m.path, clipLabel = stringResource(Res.string.file_path))
+                    })
+                }
+            }
+            item {
+                VerticalSpace(dp = 16.dp)
+                PCard(modifier = Modifier.padding(horizontal = PlainTheme.PAGE_HORIZONTAL_MARGIN)) {
+                    PListItem(title = stringResource(Res.string.file_size), value = m.size.formatBytes())
+                    PListItem(title = stringResource(Res.string.type), value = m.path.getMimeType())
+                    PListItem(title = stringResource(Res.string.duration), value = m.durationMs.formatDurationMs())
+                    PListItem(title = stringResource(Res.string.created_at), value = m.createdAt.formatDateTime())
+                    PListItem(title = stringResource(Res.string.updated_at), value = m.updatedAt.formatDateTime())
+                }
+            }
+            item {
+                BottomSpace()
+            }
+        }
+    }
+}

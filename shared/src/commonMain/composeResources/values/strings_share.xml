@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_link">Share link</string>
+    <string name="share_links">Shared links</string>
+    <string name="share_links_desc">Links you created for files and folders</string>
+    <string name="create_share_link">Create share link</string>
+    <string name="edit_share_link">Edit share link</string>
+    <string name="share_name_placeholder">Name</string>
+    <string name="share_expiry">Expiry</string>
+    <string name="share_expiry_never">Never</string>
+    <string name="share_expiry_1h">1 hour</string>
+    <string name="share_expiry_1d">1 day</string>
+    <string name="share_expiry_7d">7 days</string>
+    <string name="share_expiry_30d">30 days</string>
+    <string name="share_read_only">Read only</string>
+    <string name="share_link_desc">Anyone with this link can access the shared files until it expires</string>
+    <string name="share_created">Link created</string>
+    <string name="share_expires_on">Expires %1$s</string>
+    <string name="share_expired">Expired</string>
+    <string name="share_no_links">No shared links</string>
+    <string name="share_delete_desc">Deleting this share immediately revokes the link</string>
+    <string name="send_to_chat">Send to chat</string>
+    <string name="open">Open</string>
+    <string name="open_as_text">Open as text</string>
+    <string name="save_to_files">Save to files</string>
+    <string name="save_as_note">Save as note</string>
+    <string name="send_count">Send (%1$d)</string>
+    <string name="send_failed">Failed to send to some chats</string>
+    <string name="saved_to_downloads">Saved to Downloads</string>
+    <string name="cannot_get_content">Cannot access the shared content</string>
+    <string name="files_with_size">%1$d files · %2$s</string>
+</resources>

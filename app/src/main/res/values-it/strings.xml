@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_service_label">Controllo remoto PlainApp</string>
+    <string name="accessibility_service_description">PlainApp usa questo servizio di accessibilità per abilitare il controllo remoto durante il mirroring dello schermo. Inietta eventi di tocco (tap, scorrimento, trascinamento) e azioni di navigazione (Indietro, Home, Recenti) inviate dall\'interfaccia web.</string>
+    <string name="shortcut_notes">Note</string>
+    <string name="shortcut_docs">Documenti</string>
+    <string name="shortcut_feeds">Feed</string>
+    <string name="shortcut_pomodoro_timer">Timer Pomodoro</string>
+    <string name="shortcut_images">Immagini</string>
+    <string name="shortcut_videos">Video</string>
+    <string name="shortcut_audio">Audio</string>
+    <string name="shortcut_files">File</string>
+</resources>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="create_share_link">শেয়ার লিংক তৈরি করুন</string>
+    <string name="share_created">লিংক তৈরি হয়েছে</string>
+    <string name="share_delete_desc">মুছে ফেললে লিংক সঙ্গে সঙ্গে বাতিল হবে</string>
+    <string name="share_expired">মেয়াদোত্তীর্ণ</string>
+    <string name="share_expires_on">মেয়াদ %1$s</string>
+    <string name="share_expiry">মেয়াদ</string>
+    <string name="share_expiry_1d">1 দিন</string>
+    <string name="share_expiry_1h">1 ঘণ্টা</string>
+    <string name="share_expiry_30d">30 দিন</string>
+    <string name="share_expiry_7d">7 দিন</string>
+    <string name="share_expiry_never">কখনো না</string>
+    <string name="share_link">শেয়ার লিংক</string>
+    <string name="share_link_desc">এই লিংকযুক্ত যে কেউ মেয়াদ শেষ না হওয়া পর্যন্ত শেয়ার করা ফাইলে প্রবেশ করতে পারবেন</string>
+    <string name="share_links">শেয়ার করা লিংক</string>
+    <string name="share_links_desc">ফাইল ও ফোল্ডারের জন্য তৈরি করা লিংক</string>
+    <string name="share_name_placeholder">নাম</string>
+    <string name="share_no_links">কোনো শেয়ার লিংক নেই</string>
+    <string name="share_read_only">শুধু পড়ার জন্য</string>
+    <string name="send_to_chat">চ্যাটে পাঠান</string>
+    <string name="open">খুলুন</string>
+    <string name="open_as_text">টেক্সট হিসেবে খুলুন</string>
+    <string name="save_to_files">ফাইলে সংরক্ষণ করুন</string>
+    <string name="save_as_note">নোট হিসেবে সংরক্ষণ করুন</string>
+    <string name="send_count">পাঠান (%1$d)</string>
+    <string name="send_failed">কিছু চ্যাটে পাঠানো ব্যর্থ হয়েছে</string>
+    <string name="saved_to_downloads">ডাউনলোডে সংরক্ষিত</string>
+    <string name="cannot_get_content">শেয়ার করা বিষয়বস্তু অ্যাক্সেস করা যাচ্ছে না</string>
+    <string name="files_with_size">%1$dটি ফাইল · %2$s</string>
+</resources>

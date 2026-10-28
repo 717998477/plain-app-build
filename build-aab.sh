@@ -1,0 +1,50 @@
+#!/bin/bash
+
+function err_and_exit()
+{
+  echo "$1" >&2
+  exit 1
+}
+
+function getVersionName()
+{
+  echo $(grep versionName ./app/build.gradle.kts | awk -F '"' '{print $2}')
+}
+
+sed -i -e '/READ_SMS/d' ./app/src/main/AndroidManifest.xml
+sed -i -e '/SEND_SMS/d' ./app/src/main/AndroidManifest.xml
+sed -i -e '/READ_CALL_LOG/d' ./app/src/main/AndroidManifest.xml
+sed -i -e '/WRITE_CALL_LOG/d' ./app/src/main/AndroidManifest.xml
+sed -i -e '/REQUEST_INSTALL_PACKAGES/d' ./app/src/main/AndroidManifest.xml
+sed -i -e '/QUERY_ALL_PACKAGES/d' ./app/src/main/AndroidManifest.xml
+sed -i -e '/REQUEST_DELETE_PACKAGES/d' ./app/src/main/AndroidManifest.xml
+perl -i -0pe 's/\n\s+<service\n[^<]*\.services\.PlainAccessibilityService[\s\S]*?<\/service>//g' ./app/src/main/AndroidManifest.xml
+
+cat > ./keystore.properties <<EOF
+storePassword=$ANDROID_STORE_PASSWORD
+keyPassword=$ANDROID_KEY_PASSWORD
+keyAlias=release
+storeFile=release.jks
+EOF
+
+if [ -n "$ANDROID_HOME" ]; then
+  SDK_DIR="$ANDROID_HOME"
+elif [ -d "$HOME/Library/Android/sdk" ]; then
+  SDK_DIR="$HOME/Library/Android/sdk"
+else
+  SDK_DIR="/usr/local/lib/android/sdk"
+fi
+cat > ./local.properties <<EOF
+sdk.dir=$SDK_DIR
+EOF
+
+cat > ./app/play-config.json <<EOF
+$PLAY_STORE_CONFIG_JSON
+EOF
+
+# Only the googleRelease bundle is needed; bundleRelease would also build
+# the unused github flavor.
+./gradlew :app:bundleGoogleRelease || err_and_exit "build failed"
+
+BUILD_FILE="PlainApp-$(getVersionName)-Google-Play.aab"
+mv ./app/build/outputs/bundle/googleRelease/app-google-release.aab $BUILD_FILE

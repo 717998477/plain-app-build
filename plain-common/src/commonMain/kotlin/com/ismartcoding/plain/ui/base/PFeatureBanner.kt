@@ -1,0 +1,109 @@
+package com.ismartcoding.plain.ui.base
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.ismartcoding.plain.ui.components.ButtonSize
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+
+@Composable
+fun PFeatureBanner(
+    modifier: Modifier = Modifier,
+    tag: String,
+    title: String,
+    description: String,
+    buttonText: String,
+    onClick: () -> Unit,
+    tagIcon: DrawableResource,
+    buttonIcon: DrawableResource,
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors().copy(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+        onClick = onClick,
+    ) {
+        Column(modifier = Modifier.padding(24.dp)) {
+            PFeatureBannerLabel(tag = tag, icon = tagIcon)
+            Spacer(Modifier.height(16.dp))
+            PFeatureBannerTexts(title = title, description = description)
+            Spacer(Modifier.height(20.dp))
+            PFilledButton(
+                text = buttonText,
+                icon = painterResource(buttonIcon),
+                onClick = onClick,
+                buttonSize = ButtonSize.MEDIUM,
+            )
+        }
+    }
+}
+
+@Composable
+private fun PFeatureBannerLabel(
+    tag: String,
+    icon: DrawableResource,
+) {
+    Surface(
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = tag,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+    }
+}
+
+@Composable
+private fun PFeatureBannerTexts(
+    title: String,
+    description: String,
+) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.headlineSmall,
+        color = MaterialTheme.colorScheme.onPrimaryContainer,
+        fontWeight = FontWeight.Bold,
+    )
+    Spacer(Modifier.height(8.dp))
+    Text(
+        text = description,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f),
+    )
+}

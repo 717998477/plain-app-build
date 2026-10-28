@@ -1,0 +1,36 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath(libs.gradle)
+        classpath(libs.kotlin.gradle.plugin)
+    }
+}
+
+plugins {
+    alias(libs.plugins.compose.compiler) apply false
+    alias(libs.plugins.compose.multiplatform) apply false
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+tasks.register<Delete>("clean").configure {
+    delete(rootProject.layout.buildDirectory)
+}
+
+subprojects {
+    tasks.withType<Exec>().configureEach {
+        if (name.startsWith("buildPlainRust")) {
+            workingDir(rootProject.projectDir)
+            outputs.upToDateWhen { false }
+        }
+    }
+}

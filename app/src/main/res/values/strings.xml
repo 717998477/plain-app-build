@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings referenced from AndroidManifest.xml — must remain as Android resources -->
+<resources>
+    <string name="app_name" translatable="false">PlainApp</string>
+    <string name="clipboard_sync_tile" translatable="false">Clipboard</string>
+    <string name="accessibility_service_label">PlainApp Remote Control</string>
+    <string name="accessibility_service_description">PlainApp uses this accessibility service to enable remote control during screen mirroring. It injects touch events (tap, swipe, scroll) and navigation actions (Back, Home, Recents) sent from the web interface.</string>
+    <string name="shortcut_notes">Notes</string>
+    <string name="shortcut_docs">Docs</string>
+    <string name="shortcut_feeds">Feeds</string>
+    <string name="shortcut_pomodoro_timer">Pomodoro timer</string>
+    <string name="shortcut_images">Images</string>
+    <string name="shortcut_videos">Videos</string>
+    <string name="shortcut_audio">Audio</string>
+    <string name="shortcut_files">Files</string>
+    <string name="desktop_access">Desktop Access</string>
+</resources>

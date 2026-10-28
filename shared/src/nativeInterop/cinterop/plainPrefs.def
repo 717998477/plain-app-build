@@ -1,0 +1,2 @@
+headers = plain_rust.h
+package = com.ismartcoding.plain.rustprefs

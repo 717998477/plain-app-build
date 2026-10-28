@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_service_label">PlainApp Fernsteuerung</string>
+    <string name="accessibility_service_description">PlainApp verwendet diesen Bedienungshilfen-/Accessibility-Dienst, um während der Bildschirmspiegelung die Fernsteuerung zu ermöglichen. Er injiziert Touch-Ereignisse (Tippen, Wischen, Scrollen) und Navigationsaktionen (Zurück, Home, Zuletzt verwendet), die von der Weboberfläche gesendet werden.</string>
+    <string name="shortcut_notes">Notizen</string>
+    <string name="shortcut_docs">Dokumente</string>
+    <string name="shortcut_feeds">Feeds</string>
+    <string name="shortcut_pomodoro_timer">Pomodoro-Timer</string>
+    <string name="shortcut_images">Bilder</string>
+    <string name="shortcut_videos">Videos</string>
+    <string name="shortcut_audio">Audio</string>
+    <string name="shortcut_files">Dateien</string>
+</resources>

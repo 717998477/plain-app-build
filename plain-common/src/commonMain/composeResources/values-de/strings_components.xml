@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="loading">Lade…</string>
+<string name="srl_header_pulling">Zum Aktualisieren nach unten ziehen</string>
+<string name="srl_header_release">Zum Aktualisieren loslassen</string>
+<string name="srl_header_refreshing">Aktualisiere…</string>
+<string name="srl_header_finish">Aktualisiert</string>
+<string name="srl_header_failed">Aktualisierung fehlgeschlagen</string>
+<string name="back">Zurück</string>
+<string name="no_data">Keine Daten</string>
+<string name="no_results_found">Keine Ergebnisse gefunden</string>
+<string name="searching">Suchen…</string>
+<string name="delete">Löschen</string>
+<string name="paste">Einfügen</string>
+<string name="password">Passwort</string>
+<string name="clear">Löschen</string>
+<string name="copy_text">Text kopieren</string>
+</resources>

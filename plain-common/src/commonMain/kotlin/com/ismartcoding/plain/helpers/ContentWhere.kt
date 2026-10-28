@@ -1,0 +1,70 @@
+package com.ismartcoding.plain.helpers
+
+/**
+ * Escapes SQLite LIKE wildcards in [value] so it matches literally. The single
+ * source of LIKE escaping — every LIKE built from user input goes through this
+ * (ContentWhere's LIKE builders do it automatically; custom LIKE selections must
+ * pair the escaped value with an explicit `ESCAPE '\'` clause).
+ */
+fun escapeLike(value: String): String =
+    value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+data class ContentWhere(
+    private val selections: MutableList<String> = mutableListOf(),
+    val args: MutableList<String> = mutableListOf(),
+    var trash: Boolean? = null,
+) {
+    fun addIn(field: String, values: List<String>) {
+        if (values.isNotEmpty()) {
+            selections.add("$field IN (${CharArray(values.size) { '?' }.joinToString(",")})")
+            args.addAll(values)
+        }
+    }
+
+    fun addNotIn(field: String, values: List<String>) {
+        if (values.isNotEmpty()) {
+            selections.add("$field NOT IN (${CharArray(values.size) { '?' }.joinToString(",")})")
+            args.addAll(values)
+        }
+    }
+
+    fun add(selection: String, value: String? = null) {
+        selections.add(selection)
+        if (value != null) {
+            args.add(value)
+        }
+    }
+
+    fun addGt(field: String, value: String) {
+        add("$field > ?", value)
+    }
+
+    fun addEqual(field: String, value: String) {
+        add("$field = ?", value)
+    }
+
+    fun addNotEqual(field: String, value: String) {
+        add("$field != ?", value)
+    }
+
+    fun addLike(field: String, value: String) {
+        add("$field LIKE '%' || ? || '%' ESCAPE '\\'", escapeLike(value))
+    }
+
+    fun addNotStartsWith(field: String, value: String) {
+        add("$field NOT LIKE ? || '%' ESCAPE '\\'", escapeLike(value))
+    }
+
+    fun addLikes(fields: List<String>, values: List<String>) {
+        val r = fields.joinToString(" OR ") { "$it LIKE '%' || ? || '%' ESCAPE '\\'" }
+        selections.add("($r)")
+        args.addAll(values.map { escapeLike(it) })
+    }
+
+    fun toSelection(): String {
+        if (selections.isEmpty()) {
+            return "1=1"
+        }
+        return selections.joinToString(" AND ")
+    }
+}

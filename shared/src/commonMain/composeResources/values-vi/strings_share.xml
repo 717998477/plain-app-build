@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="create_share_link">Tạo liên kết chia sẻ</string>
+    <string name="share_created">Đã tạo liên kết</string>
+    <string name="share_delete_desc">Xóa sẽ hủy liên kết ngay lập tức</string>
+    <string name="share_expired">Đã hết hạn</string>
+    <string name="share_expires_on">Hết hạn %1$s</string>
+    <string name="share_expiry">Thời hạn</string>
+    <string name="share_expiry_1d">1 ngày</string>
+    <string name="share_expiry_1h">1 giờ</string>
+    <string name="share_expiry_30d">30 ngày</string>
+    <string name="share_expiry_7d">7 ngày</string>
+    <string name="share_expiry_never">Không bao giờ</string>
+    <string name="share_link">Liên kết chia sẻ</string>
+    <string name="share_link_desc">Bất kỳ ai có liên kết này đều có thể truy cập tệp được chia sẻ đến khi hết hạn</string>
+    <string name="share_links">Liên kết đã chia sẻ</string>
+    <string name="share_links_desc">Liên kết bạn tạo cho tệp và thư mục</string>
+    <string name="share_name_placeholder">Tên</string>
+    <string name="share_no_links">Không có liên kết chia sẻ</string>
+    <string name="share_read_only">Chỉ đọc</string>
+    <string name="send_to_chat">Gửi vào chat</string>
+    <string name="open">Mở</string>
+    <string name="open_as_text">Mở dưới dạng văn bản</string>
+    <string name="save_to_files">Lưu vào tệp</string>
+    <string name="save_as_note">Lưu thành ghi chú</string>
+    <string name="send_count">Gửi (%1$d)</string>
+    <string name="send_failed">Gửi tới một số chat thất bại</string>
+    <string name="saved_to_downloads">Đã lưu vào Tải xuống</string>
+    <string name="cannot_get_content">Không thể truy cập nội dung được chia sẻ</string>
+    <string name="files_with_size">%1$d tệp · %2$s</string>
+</resources>

@@ -1,0 +1,56 @@
+package com.ismartcoding.plain.ui.home
+
+import com.ismartcoding.plain.preferences.*
+import com.ismartcoding.plain.ui.theme.PlainTheme
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import com.ismartcoding.plain.i18n.Res
+import com.ismartcoding.plain.i18n.dlna_receiver
+import com.ismartcoding.plain.i18n.dlna_receiver_desc
+import com.ismartcoding.plain.ui.resources.cast as ui_drawable_cast
+import com.ismartcoding.plain.ui.base.PCard
+import com.ismartcoding.plain.ui.base.PListItem
+import androidx.compose.material3.Switch
+import com.ismartcoding.plain.Prefs
+import com.ismartcoding.plain.ui.base.VerticalSpace
+import com.ismartcoding.plain.ui.media.extensions.collectAsStateValue
+import com.ismartcoding.plain.ui.state.launchSafe
+import com.ismartcoding.plain.ui.navigation.Routing
+import com.ismartcoding.plain.ui.theme.tipsText
+import org.jetbrains.compose.resources.stringResource
+import com.ismartcoding.plain.ui.resources.Res as UiRes
+
+@Composable
+fun DlnaReceiverSection(navController: NavHostController) {
+    val dlnaReceiverEnabled = Prefs.dlna.collectAsStateValue()
+    val scope = rememberCoroutineScope()
+
+    PCard(modifier = Modifier.padding(horizontal = PlainTheme.PAGE_HORIZONTAL_MARGIN)) {
+        PListItem(
+            modifier = Modifier.clickable { navController.navigate(Routing.DlnaReceiver) },
+            icon = UiRes.drawable.ui_drawable_cast,
+            separatedActions = true,
+            title = stringResource(Res.string.dlna_receiver),
+        ) {
+            Switch(checked = dlnaReceiverEnabled, onCheckedChange = { enable ->
+                scope.launchSafe {
+                    Prefs.set(PrefKeys.DLNA, enable)
+                }
+            })
+        }
+        Text(
+            text = stringResource(Res.string.dlna_receiver_desc),
+            style = MaterialTheme.typography.tipsText(),
+            modifier = Modifier.padding(horizontal = 16.dp),
+        )
+        VerticalSpace(16.dp)
+    }
+}

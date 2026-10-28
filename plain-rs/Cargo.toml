@@ -1,0 +1,45 @@
+[package]
+name = "plain-rust"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "plain_rust"
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+plain-server = { git = "https://github.com/717998477/plain-core-private.git", branch = "main", default-features = false, features = ["core", "mobile", "image-inference", "http_transport", "ble-native"] }
+plain-rs = { git = "https://github.com/717998477/plain-core-private.git", branch = "main", default-features = false, features = ["ble-native", "prefs"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "sync"] }
+
+[target.'cfg(target_os = "android")'.dependencies]
+jni = "0.22"
+
+[profile.dev]
+opt-level = 1
+lto = false
+codegen-units = 16
+incremental = true
+debug = 0
+strip = "symbols"
+
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.dev.package.plain-server]
+opt-level = 1
+
+[profile.dev.package.plain-rs]
+opt-level = 1
+
+[profile.dev.package.plain-inference]
+opt-level = 1
+
+[profile.release]
+opt-level = 1
+lto = false
+codegen-units = 16
+strip = "symbols"
+debug = 0
+panic = "abort"

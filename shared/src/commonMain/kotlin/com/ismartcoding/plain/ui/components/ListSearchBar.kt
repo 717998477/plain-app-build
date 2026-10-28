@@ -1,0 +1,100 @@
+package com.ismartcoding.plain.ui.components
+
+import com.ismartcoding.plain.i18n.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalWindowInfo
+import org.jetbrains.compose.resources.stringResource
+import com.ismartcoding.plain.IData
+import com.ismartcoding.plain.ui.state.ISearchableViewModel
+import com.ismartcoding.plain.ui.state.exitSearchMode
+import com.ismartcoding.plain.ui.theme.cardBackgroundNormal
+import com.ismartcoding.plain.ui.resources.Res as UiRes
+import com.ismartcoding.plain.ui.resources.arrow_left as ui_drawable_arrow_left
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <T : IData> ListSearchBar(
+    viewModel: ISearchableViewModel<T>,
+    onSearch: (String) -> Unit,
+) {
+    val focusRequester = remember { FocusRequester() }
+    val windowInfo = LocalWindowInfo.current
+    LaunchedEffect(windowInfo) {
+        snapshotFlow { windowInfo.isWindowFocused }.collect { isWindowFocused ->
+            if (isWindowFocused && viewModel.searchActive.value) {
+                focusRequester.requestFocus()
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        SearchBar(
+            modifier = Modifier
+                .focusRequester(focusRequester),
+            inputField = {
+                SearchBarDefaults.InputField(
+                    query = viewModel.queryText.value,
+                    onQueryChange = {
+                        viewModel.queryText.value = it
+                    },
+                    onSearch = onSearch,
+                    expanded = viewModel.searchActive.value,
+                    onExpandedChange = { expanded ->
+                        if (viewModel.searchActive.value != expanded) {
+                            viewModel.searchActive.value = expanded
+                            if (!viewModel.searchActive.value && viewModel.queryText.value.isEmpty()) {
+                                viewModel.exitSearchMode()
+                                onSearch("")
+                            }
+                        }
+                    },
+                    placeholder = { Text(stringResource(Res.string.search)) },
+                    leadingIcon = {
+                        PIconButton(
+                            icon = UiRes.drawable.ui_drawable_arrow_left,
+                            contentDescription = stringResource(Res.string.back),
+                            tint = MaterialTheme.colorScheme.onSurface,
+                        ) {
+                            if (!viewModel.searchActive.value || viewModel.queryText.value.isEmpty()) {
+                                viewModel.exitSearchMode()
+                                onSearch("")
+                            } else {
+                                viewModel.searchActive.value = false
+                            }
+                        }
+                    },
+                )
+            },
+            expanded = viewModel.searchActive.value,
+            onExpandedChange = { expanded ->
+                if (viewModel.searchActive.value != expanded) {
+                    viewModel.searchActive.value = expanded
+                    if (!viewModel.searchActive.value && viewModel.queryText.value.isEmpty()) {
+                        viewModel.exitSearchMode()
+                        onSearch("")
+                    }
+                }
+            },
+            colors = SearchBarDefaults.colors(containerColor = MaterialTheme.colorScheme.cardBackgroundNormal),
+        ) {
+        }
+    }
+}

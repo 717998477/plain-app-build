@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_service_label">Contrôle à distance PlainApp</string>
+    <string name="accessibility_service_description">PlainApp utilise ce service d\'accessibilité pour permettre le contrôle à distance pendant la mise en miroir de l\'écran. Il injecte des événements tactiles (tap, balayage, défilement) et des actions de navigation (Retour, Accueil, Récents) envoyés depuis l\'interface Web.</string>
+    <string name="shortcut_notes">Notes</string>
+    <string name="shortcut_docs">Documents</string>
+    <string name="shortcut_feeds">Flux</string>
+    <string name="shortcut_pomodoro_timer">Minuteur Pomodoro</string>
+    <string name="shortcut_images">Images</string>
+    <string name="shortcut_videos">Vidéos</string>
+    <string name="shortcut_audio">Audio</string>
+    <string name="shortcut_files">Fichiers</string>
+</resources>
