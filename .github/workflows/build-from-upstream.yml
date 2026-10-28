@@ -73,9 +73,10 @@ jobs:
         run: |
           set -e
           cd src
-          # 候选版本：main + 最近 20 个 commit（新 → 旧），覆盖上游重构前的基线
-          COMMITS=$(git log --format=%H -20 origin/main)
-          VERSIONS="main $COMMITS"
+          # 候选版本：main（上游最新，兼容则直接构建）→ 定制基线 2635c90（10-27 15:28，
+          # 与我们的 fork 结构一致：AudioCatalogObserver 存在、models 在 api/graphql/models）
+          BASELINE=2635c90f3c0229ba2ac2fcccf023e27deabb904e5
+          VERSIONS="main $BASELINE"
           SUCCESS=""
           for v in $VERSIONS; do
             git checkout -q "$v" 2>/dev/null || git checkout -q FETCH_HEAD
