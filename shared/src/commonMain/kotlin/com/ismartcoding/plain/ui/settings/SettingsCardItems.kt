@@ -11,7 +11,11 @@ import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import com.ismartcoding.plain.ui.theme.DarkTheme
 import com.ismartcoding.plain.ui.base.PCard
 import com.ismartcoding.plain.ui.base.PListItem
@@ -79,13 +83,17 @@ internal fun SettingsCardItems(navController: NavHostController) {
     }
     VerticalSpace(16.dp)
     PCard(modifier = Modifier.padding(horizontal = PlainTheme.PAGE_HORIZONTAL_MARGIN)) {
+        var hiddenFromRecents by remember { mutableStateOf(isHideFromRecentsEnabled()) }
         PListItem(
             title = stringResource(Res.string.hide_from_recents),
             subtitle = stringResource(Res.string.hide_from_recents_desc),
         ) {
             Switch(
-                checked = isHideFromRecentsEnabled(),
-                onCheckedChange = { setHideFromRecents(it) },
+                checked = hiddenFromRecents,
+                onCheckedChange = {
+                    hiddenFromRecents = it
+                    setHideFromRecents(it)
+                },
             )
         }
     }
