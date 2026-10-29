@@ -47,12 +47,7 @@ jobs:
         working-directory: src
         run: |
           keytool -genkeypair -v -keystore ./app/release.jks -storepass custom123 -alias release -keypass custom123 -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Custom Build,O=Custom,C=CN"
-          cat > ./keystore.properties <<EOF
-          storePassword=custom123
-          keyPassword=custom123
-          keyAlias=release
-          storeFile=release.jks
-          EOF
+          printf 'storePassword=custom123\nkeyPassword=custom123\nkeyAlias=release\nstoreFile=release.jks\n' > ./keystore.properties
 
       - name: Generate debug keystore
         working-directory: src
@@ -106,12 +101,7 @@ jobs:
             rm -rf .git
             chmod +x ./gradlew
             keytool -genkeypair -v -keystore ./app/release.jks -storepass custom123 -alias release -keypass custom123 -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Custom Build,O=Custom,C=CN" >/dev/null 2>&1
-            cat > ./keystore.properties <<EOF
-            storePassword=custom123
-            keyPassword=custom123
-            keyAlias=release
-            storeFile=release.jks
-            EOF
+            printf 'storePassword=custom123\nkeyPassword=custom123\nkeyAlias=release\nstoreFile=release.jks\n' > ./keystore.properties
             mkdir -p ~/.android
             keytool -genkeypair -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" >/dev/null 2>&1
             echo "sdk.dir=/usr/local/lib/android/sdk" > local.properties
