@@ -319,10 +319,16 @@ def patch_strings():
     ok2 = add(P("shared/src/commonMain/composeResources/values-zh-rCN/strings_settings.xml"),
               [("hide_from_recents", "在最近任务中隐藏"),
                ("hide_from_recents_desc", "从最近任务列表中隐藏此应用")])
-    if ok1 and ok2:
-        record("strings", True, "中英文词条就绪")
+    ok3 = add(P("shared/src/commonMain/composeResources/values/strings_network.xml"),
+              [("custom_port", "Custom port"),
+               ("invalid_port", "Invalid port (1-65535)")])
+    ok4 = add(P("shared/src/commonMain/composeResources/values-zh-rCN/strings_network.xml"),
+              [("custom_port", "自定义端口"),
+               ("invalid_port", "无效端口 (1-65535)")])
+    if ok1 and ok2 and ok3 and ok4:
+        record("strings", True, "中英文词条就绪（含自定义端口）")
         return True
-    record("strings", False, "strings_settings.xml 缺失")
+    record("strings", False, "strings xml 缺失")
     return False
 
 # ---------- 8. build.gradle.kts：压缩配置 + 去 LeakCanary ----------
@@ -383,7 +389,123 @@ def remove_leakcanary_file():
     record("leakcanary-file", True, "无该文件（幂等）")
     return True
 
-# ---------- 11. Cargo.toml：core 指向 private + strip + opt ----------
+# ---------- 11. 端口弹窗：自定义端口输入 ----------
+PORT_DIALOG_CUSTOM = '''fun PortSelectionDialog(
+    isHttps: Boolean,
+    currentPort: Int,
+    onDismiss: () -> Unit,
+    onSelect: (Int) -> Unit,
+) {
+    val ports = if (isHttps) httpsPorts else httpPorts
+    val isCustomPort = currentPort !in ports
+    var selectedPort by remember { mutableIntStateOf(if (isCustomPort) -1 else currentPort) }
+    var customPortText by remember { mutableStateOf(if (isCustomPort) currentPort.toString() else "") }
+    var portError by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        modifier = Modifier.fillMaxWidth(),
+        containerColor = MaterialTheme.colorScheme.dialogSheetBackground,
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(Res.string.change_port)) },
+        text = {
+            Column {
+                LazyColumn(
+                    modifier = Modifier
+                        .height(280.dp)
+                        .selectableGroup(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    items(ports.toList()) { p ->
+                        PDialogRadioRow(
+                            selected = p == selectedPort,
+                            onClick = {
+                                selectedPort = p
+                                portError = false
+                            },
+                            text = p.toString(),
+                        )
+                    }
+                    item {
+                        PDialogRadioRow(
+                            selected = selectedPort == -1,
+                            onClick = {
+                                selectedPort = -1
+                                portError = false
+                            },
+                            text = stringResource(Res.string.custom_port),
+                        )
+                    }
+                }
+                if (selectedPort == -1) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    PTextField(
+                        readOnly = false,
+                        value = customPortText,
+                        singleLine = true,
+                        onValueChange = {
+                            customPortText = it.filter { ch -> ch.isDigit() }
+                            portError = false
+                        },
+                        placeholder = "1024-65535",
+                        errorMessage = if (portError) stringResource(Res.string.invalid_port) else "",
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            PFilledButton(
+                text = stringResource(Res.string.save),
+                buttonSize = ButtonSize.MEDIUM,
+                onClick = {
+                    if (selectedPort == -1) {
+                        val port = customPortText.toIntOrNull()
+                        if (port == null || port !in 1..65535) {
+                            portError = true
+                            return@PFilledButton
+                        }
+                        onSelect(port)
+                    } else {
+                        onSelect(selectedPort)
+                    }
+                    onDismiss()
+                },
+            )
+        },
+        dismissButton = {
+            PTextButton(text = stringResource(Res.string.cancel), onClick = onDismiss)
+        },
+    )
+}
+'''
+
+def patch_port_dialog():
+    p = P("shared/src/commonMain/kotlin/com/ismartcoding/plain/ui/web/components/WebAddressBarEditDialogs.kt")
+    if not os.path.exists(p):
+        record("port-dialog", False, "WebAddressBarEditDialogs.kt 不存在")
+        return False
+    s = read(p)
+    if "custom_port" in s and "selectedPort == -1" in s:
+        record("port-dialog", True, "自定义端口已存在（幂等）")
+        return True
+    marker = "fun PortSelectionDialog("
+    idx = s.find(marker)
+    if idx < 0:
+        record("port-dialog", False, "PortSelectionDialog 未找到")
+        return False
+    head = s[:idx]
+    # 补缺失 import：mutableIntStateOf + selectableGroup
+    if "mutableIntStateOf" not in head:
+        head = head.replace("import androidx.compose.runtime.mutableStateOf",
+                            "import androidx.compose.runtime.mutableIntStateOf\nimport androidx.compose.runtime.mutableStateOf", 1)
+    if "selectableGroup" not in head:
+        head = head.replace("import androidx.compose.foundation.layout.Arrangement",
+                            "import androidx.compose.foundation.selection.selectableGroup\nimport androidx.compose.foundation.layout.Arrangement", 1)
+    write(p, head + PORT_DIALOG_CUSTOM)
+    ok = "custom_port" in head + PORT_DIALOG_CUSTOM
+    record("port-dialog", ok, "自定义端口已注入" if ok else "注入不完整")
+    return ok
+
+# ---------- 12. Cargo.toml：core 指向 private + strip + opt ----------
 def patch_cargo():
     p = P("plain-rs/Cargo.toml")
     if not os.path.exists(p):
@@ -449,6 +571,7 @@ def main():
         ("build-gradle", patch_build_gradle),
         ("debug-manifest", patch_debug_manifest),
         ("leakcanary-file", remove_leakcanary_file),
+        ("port-dialog", patch_port_dialog),
         ("cargo", patch_cargo),
     ]
     critical_fail = []
