@@ -305,14 +305,20 @@ def patch_strings():
         changed = False
         for name, val in entries:
             if f'name="{name}"' not in s:
-                # 插在 <string name="logs"> 行后
+                # 优先插在 <string name="logs"> 行后；无该锚点时插到 </resources> 前
                 m = re.search(r'(<string name="logs">.*?</string>\n)', s)
                 if m:
                     s = s.replace(m.group(1), m.group(1) + f'    <string name="{name}">{val}</string>\n')
                     changed = True
+                else:
+                    m2 = re.search(r'(\s*</resources>\s*$)', s)
+                    if m2:
+                        s = s.replace(m2.group(1), f'    <string name="{name}">{val}</string>\n' + m2.group(1))
+                        changed = True
         if changed:
             write(p, s)
-        return True
+        # 最终校验：所有词条必须实际存在
+        return all(f'name="{name}"' in s for name, _ in entries)
     ok1 = add(P("shared/src/commonMain/composeResources/values/strings_settings.xml"),
               [("hide_from_recents", "Hide from recent apps"),
                ("hide_from_recents_desc", "Hide this app from the recent apps list")])
