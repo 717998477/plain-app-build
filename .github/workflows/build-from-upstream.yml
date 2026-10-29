@@ -100,6 +100,8 @@ jobs:
             cp -r ../fork-src/. .
             rm -rf .git
             chmod +x ./gradlew
+            # 清除可能已存在的 keystore，避免 keytool alias 冲突导致脚本退出
+            rm -f ./app/release.jks ~/.android/debug.keystore
             keytool -genkeypair -v -keystore ./app/release.jks -storepass custom123 -alias release -keypass custom123 -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Custom Build,O=Custom,C=CN" >/dev/null 2>&1
             printf 'storePassword=custom123\nkeyPassword=custom123\nkeyAlias=release\nstoreFile=release.jks\n' > ./keystore.properties
             mkdir -p ~/.android
