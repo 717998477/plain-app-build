@@ -395,13 +395,13 @@ def patch_cargo():
     core_branch = "upstream-sync" if not os.path.exists(obs) else "main"
     s = read(p)
     orig = s
-    # plainhub → private（兼容带 ?branch=main 与不带两种写法）
+    # plainhub → private（URL 不带 branch；branch 是独立参数，单独处理）
     s = s.replace("https://github.com/plainhub/plain-core.git?branch=main",
-                  f"https://github.com/717998477/plain-core-private.git?branch={core_branch}")
+                  "https://github.com/717998477/plain-core-private.git")
     s = s.replace("https://github.com/plainhub/plain-core.git",
-                  f"https://github.com/717998477/plain-core-private.git?branch={core_branch}")
-    s = s.replace("https://github.com/717998477/plain-core-private.git?branch=main",
-                  f"https://github.com/717998477/plain-core-private.git?branch={core_branch}")
+                  "https://github.com/717998477/plain-core-private.git")
+    # branch 独立参数：fork 基线（main 分支）保持 main；上游新代际切 upstream-sync
+    s = s.replace('branch = "main"', f'branch = "{core_branch}"')
     # dev profile strip
     if 'strip = "symbols"' not in s:
         s = s.replace('[profile.dev]', '[profile.dev]\nstrip = "symbols"', 1)
@@ -414,8 +414,6 @@ def patch_cargo():
         lk2 = lk.replace("https://github.com/plainhub/plain-core.git?branch=main",
                          f"https://github.com/717998477/plain-core-private.git?branch={core_branch}")
         lk2 = lk2.replace("https://github.com/plainhub/plain-core.git",
-                          f"https://github.com/717998477/plain-core-private.git?branch={core_branch}")
-        lk2 = lk2.replace(f"https://github.com/717998477/plain-core-private.git?branch=main",
                           f"https://github.com/717998477/plain-core-private.git?branch={core_branch}")
         try:
             import subprocess

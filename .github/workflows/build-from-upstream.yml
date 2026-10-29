@@ -81,7 +81,7 @@ jobs:
           cp -r ../patch-repo/patches /tmp/patch-run
           if python3 /tmp/patch-run/apply-patches.py .; then
             echo "✅ 上游补丁通过，开始构建..."
-            if ./gradlew assembleGithubRelease -PabiFilters=arm64-v8a --stacktrace; then
+            if ./gradlew assembleRelease -PabiFilters=arm64-v8a --stacktrace; then
               SUCCESS="upstream-main"
               echo "🎉 上游 main 构建成功"
             else
@@ -123,7 +123,12 @@ jobs:
       - name: Rename APK
         working-directory: src
         run: |
-          APK_PATH=$(find . -name "app-github-release.apk" -type f | head -1)
+          APK_PATH=$(find . \( -name "app-release.apk" -o -name "app-github-release.apk" \) -type f | head -1)
+          if [ -z "$APK_PATH" ]; then
+            echo "❌ 未找到 APK 产物" >&2
+            ls -la app/build/outputs/apk/ 2>/dev/null || true
+            exit 1
+          fi
           mv "$APK_PATH" ./PlainApp-custom-arm64-release.apk
           ls -lh PlainApp-custom-arm64-release.apk
 
