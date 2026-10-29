@@ -61,6 +61,13 @@ def copy_new_files():
     else:
         record("copy-files", False, "HideFromRecents 文件缺失")
         ok = False
+    # 上游 main 重构后已删除 AudioCatalogObserver 体系 → 移除观察者文件（否则 Kotlin 编译失败）
+    obs = P("shared/src/commonMain/kotlin/com/ismartcoding/plain/rust/host/audio/AudioCatalogObserver.kt")
+    if not os.path.exists(obs):
+        obs_file = P("shared/src/androidMain/kotlin/com/ismartcoding/plain/platform/media/MediaStoreAudioCatalogObserver.kt")
+        if os.path.exists(obs_file):
+            os.remove(obs_file)
+            print("   已移除 MediaStoreAudioCatalogObserver.kt（上游无 AudioCatalogObserver 体系）")
     return ok
 
 # ---------- 2. AppFeatureTypeExt.kt：关闭更新检查/捐赠 ----------
@@ -382,38 +389,50 @@ def patch_cargo():
     if not os.path.exists(p):
         record("cargo", False, "Cargo.toml 不存在")
         return False
+    # 检测代码代际：上游 main 重构版（无 AudioCatalogObserver）→ 用 upstream-sync（上游最新 core）；
+    # fork 基线（有 AudioCatalogObserver）→ 用 main（我们定制 core）
+    obs = P("shared/src/commonMain/kotlin/com/ismartcoding/plain/rust/host/audio/AudioCatalogObserver.kt")
+    core_branch = "upstream-sync" if not os.path.exists(obs) else "main"
     s = read(p)
     orig = s
+    # plainhub → private（兼容带 ?branch=main 与不带两种写法）
+    s = s.replace("https://github.com/plainhub/plain-core.git?branch=main",
+                  f"https://github.com/717998477/plain-core-private.git?branch={core_branch}")
     s = s.replace("https://github.com/plainhub/plain-core.git",
-                  "https://github.com/717998477/plain-core-private.git")
+                  f"https://github.com/717998477/plain-core-private.git?branch={core_branch}")
+    s = s.replace("https://github.com/717998477/plain-core-private.git?branch=main",
+                  f"https://github.com/717998477/plain-core-private.git?branch={core_branch}")
     # dev profile strip
     if 'strip = "symbols"' not in s:
         s = s.replace('[profile.dev]', '[profile.dev]\nstrip = "symbols"', 1)
     if s != orig:
         write(p, s)
-    # Cargo.lock 同步替换 git 源，并把锁定的 commit 更新为 plain-core-private 的 main HEAD
-    # （plain-core-private 是我们的定制 core，与上游 core 已分叉，必须锁定到我们的 HEAD）
+    # Cargo.lock 同步替换 git 源，并把锁定的 commit 更新为 plain-core-private 对应分支 HEAD
     lock = P("plain-rs/Cargo.lock")
     if os.path.exists(lock):
         lk = read(lock)
-        lk2 = lk.replace("https://github.com/plainhub/plain-core.git",
-                         "https://github.com/717998477/plain-core-private.git")
+        lk2 = lk.replace("https://github.com/plainhub/plain-core.git?branch=main",
+                         f"https://github.com/717998477/plain-core-private.git?branch={core_branch}")
+        lk2 = lk2.replace("https://github.com/plainhub/plain-core.git",
+                          f"https://github.com/717998477/plain-core-private.git?branch={core_branch}")
+        lk2 = lk2.replace(f"https://github.com/717998477/plain-core-private.git?branch=main",
+                          f"https://github.com/717998477/plain-core-private.git?branch={core_branch}")
         try:
             import subprocess
             head = subprocess.check_output(
-                ["git", "ls-remote", "https://github.com/717998477/plain-core-private.git", "main"],
+                ["git", "ls-remote", "https://github.com/717998477/plain-core-private.git", core_branch],
                 stderr=subprocess.DEVNULL, timeout=60,
             ).decode().split()[0]
-            lk2 = re.sub(r'(plain-core-private\.git\?branch=main#)[0-9a-f]{40}',
+            lk2 = re.sub(rf'(plain-core-private\.git\?branch={core_branch}#)[0-9a-f]{{40}}',
                          lambda m: m.group(1) + head, lk2)
-            print(f"   Cargo.lock 锁定 plain-core-private@{head[:12]}")
+            print(f"   Cargo.lock 锁定 plain-core-private@{core_branch}:{head[:12]}")
         except Exception as e:  # noqa
-            print(f"   ⚠️ 获取 plain-core-private HEAD 失败: {e}")
+            print(f"   ⚠️ 获取 plain-core-private {core_branch} HEAD 失败: {e}")
         if lk2 != lk:
             write(lock, lk2)
             print("   Cargo.lock git 源已同步")
     if "plain-core-private.git" in s and 'strip = "symbols"' in s:
-        record("cargo", True, "core 指向 private + dev strip + lock 同步")
+        record("cargo", True, f"core 指向 private({core_branch}) + dev strip + lock 同步")
         return True
     record("cargo", False, "Cargo 补丁不完整")
     return False
