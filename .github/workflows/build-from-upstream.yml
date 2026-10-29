@@ -16,7 +16,7 @@ jobs:
         with:
           path: patch-repo
 
-      - name: Fetch upstream source (with history for fallback)
+      - name: Fetch upstream source (with history)
         run: |
           mkdir -p src
           cd src
@@ -24,6 +24,12 @@ jobs:
           git remote add origin https://github.com/plainhub/plain-app.git
           git fetch --shallow-since="2026-10-25" origin main
           git checkout -q -b main FETCH_HEAD
+
+      - name: Fetch custom fork source (fallback target)
+        run: |
+          git clone -q https://x-access-token:${{ secrets.CUSTOM_PAT }}@github.com/717998477/plain-app-private.git fork-src
+          cd fork-src
+          git checkout -q main
 
       - name: Set up JDK 17
         uses: actions/setup-java@v6
@@ -68,57 +74,59 @@ jobs:
         working-directory: src
         run: chmod +x ./gradlew
 
-      - name: Patch + Build with fallback (newest first, auto-fallback on any failure)
+      - name: Patch + Build with fallback (upstream first, fallback to custom fork)
         id: try-patches
         run: |
           set -e
           cd src
-          # 候选版本：main（上游最新，兼容则直接构建）→ 定制基线 2635c90（10-27 15:28，
-          # 与我们的 fork 结构一致：AudioCatalogObserver 存在、models 在 api/graphql/models）
-          BASELINE=2635c90f3c0229ba2ac2fcccf023e27deabb904e5
-          VERSIONS="main $BASELINE"
           SUCCESS=""
-          for v in $VERSIONS; do
-            git checkout -q "$v" 2>/dev/null || git checkout -q FETCH_HEAD
-            echo "==== 尝试版本: ${v:0:12} ===="
-            rm -rf /tmp/patch-run
-            cp -r ../patch-repo/patches /tmp/patch-run
-            # 1) 打补丁（关键项缺失即失败）
-            if ! python3 /tmp/patch-run/apply-patches.py .; then
-              echo "❌ 补丁脚本失败，回退下一版本..."
-              git checkout -q .
-              git clean -fdq
-              continue
-            fi
-            # 2) 快速预检：Cargo.lock 必须已指向 plain-core-private（脚本锁定到其 main HEAD）
-            if ! grep -q "plain-core-private.git" plain-rs/Cargo.lock; then
-              echo "❌ Cargo.lock 未指向 plain-core-private，回退下一版本..."
-              git checkout -q .
-              git clean -fdq
-              continue
-            fi
-            # 3) 真正构建（失败即回退）
-            echo "✅ 补丁通过，开始构建..."
+          # ===== 候选 1: 上游 main（最新，打补丁后构建） =====
+          echo "==== 尝试版本: upstream-main ===="
+          rm -rf /tmp/patch-run
+          cp -r ../patch-repo/patches /tmp/patch-run
+          if python3 /tmp/patch-run/apply-patches.py .; then
+            echo "✅ 上游补丁通过，开始构建..."
             if ./gradlew assembleGithubRelease -PabiFilters=arm64-v8a --stacktrace; then
-              SUCCESS=$v
-              echo "🎉 构建成功: ${v:0:12}"
-              break
+              SUCCESS="upstream-main"
+              echo "🎉 上游 main 构建成功"
             else
-              echo "❌ 构建失败，回退下一版本..."
-              git checkout -q .
-              git clean -fdq
+              echo "❌ 上游 main 构建失败，回退到定制 fork 源码..."
+              git checkout -q . 2>/dev/null || true
+              git clean -fdq 2>/dev/null || true
               rm -rf .gradle app/build shared/build plain-common/build
             fi
-          done
+          else
+            echo "❌ 上游补丁失败，回退到定制 fork 源码..."
+          fi
+          # ===== 候选 2: 定制 fork 源码（已含全部定制，直接构建） =====
+          if [ -z "$SUCCESS" ]; then
+            echo "==== 尝试版本: custom-fork ===="
+            rm -rf ./*
+            cp -r ../fork-src/. .
+            rm -rf .git
+            chmod +x ./gradlew
+            keytool -genkeypair -v -keystore ./app/release.jks -storepass custom123 -alias release -keypass custom123 -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Custom Build,O=Custom,C=CN" >/dev/null 2>&1
+            cat > ./keystore.properties <<EOF
+            storePassword=custom123
+            keyPassword=custom123
+            keyAlias=release
+            storeFile=release.jks
+            EOF
+            mkdir -p ~/.android
+            keytool -genkeypair -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" >/dev/null 2>&1
+            echo "sdk.dir=/usr/local/lib/android/sdk" > local.properties
+            if ./gradlew assembleGithubRelease -PabiFilters=arm64-v8a --stacktrace; then
+              SUCCESS="custom-fork"
+              echo "🎉 定制 fork 构建成功"
+            else
+              echo "❌ 定制 fork 构建失败"
+            fi
+          fi
           if [ -z "$SUCCESS" ]; then
             echo "❌ 所有候选版本均构建失败" >&2
             exit 1
           fi
-          echo "SUCCESS_VERSION=${SUCCESS:0:12}" >> "$GITHUB_OUTPUT"
-
-      - name: Find APK
-        working-directory: src
-        run: find . -name "*.apk" -type f
+          echo "SUCCESS_VERSION=$SUCCESS" >> "$GITHUB_OUTPUT"
 
       - name: Rename APK
         working-directory: src
@@ -138,10 +146,10 @@ jobs:
           body: |
             ## Custom Build (From Upstream)
             - 自动拉取上游最新代码并应用全部定制补丁
-            - 上游结构变更过大时自动回退到可构建的旧版本
-            - 本次构建基于上游版本: ${{ steps.try-patches.outputs.SUCCESS_VERSION }}
+            - 上游结构变更过大时自动回退到定制 fork 源码构建
+            - 本次构建来源: ${{ steps.try-patches.outputs.SUCCESS_VERSION }}
             - 去除检测更新 / 捐赠卡片 / 官方板块
-            - 在最近任务中隐藏开关
+            - 在最近任务中隐藏开关（中文）
             - 去除 LeakCanary
             - 自定义端口输入 / 文件列表具体时间
 
