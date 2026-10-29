@@ -2,9 +2,6 @@ name: Build From Upstream (Auto-patch)
 
 on:
   workflow_dispatch:
-  schedule:
-    # 每 6 小时自动检查上游是否有新代码，有则自动构建（UTC 时区）
-    - cron: '0 */6 * * *'
 
 permissions:
   contents: write
@@ -28,21 +25,6 @@ jobs:
           git fetch --shallow-since="2026-10-25" origin main
           git checkout -q -b main FETCH_HEAD
           git rev-parse FETCH_HEAD > upstream.sha
-
-      - name: Skip if upstream unchanged (scheduled runs only)
-        run: |
-          # 手动触发（workflow_dispatch）永远构建；定时触发时与上次构建的上游 sha 对比，无更新则跳过
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            NEW_SHA=$(cat src/upstream.sha)
-            LAST_SHA=$(curl -s -H "Authorization: Bearer ${{ secrets.CUSTOM_PAT }}" "https://api.github.com/repos/717998477/plain-app-build/releases?per_page=1" | grep -oE '上游代码: [0-9a-f]{40}' | head -1 | sed 's/.*: //')
-            echo "上游当前: ${NEW_SHA:0:12} | 上次构建: ${LAST_SHA:0:12}"
-            if [ -n "$LAST_SHA" ] && [ "$NEW_SHA" = "$LAST_SHA" ]; then
-              echo "上游无新提交，跳过本次构建"
-              exit 0
-            fi
-          else
-            echo "手动触发，正常构建"
-          fi
 
       - name: Fetch custom fork source (fallback target)
         run: |
